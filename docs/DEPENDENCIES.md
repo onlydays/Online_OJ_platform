@@ -59,7 +59,7 @@
 ```bash
 mkdir -p backend/third_party
 wget -O backend/third_party/httplib.h \
-  https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h
+  https://cdn.jsdelivr.net/gh/yhirose/cpp-httplib@master/httplib.h
 ```
 
 ### 2.2 nlohmann/json — JSON 解析 / 序列化
@@ -74,7 +74,7 @@ wget -O backend/third_party/httplib.h \
 
 ```bash
 wget -O backend/third_party/json.hpp \
-  https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
+  https://cdn.jsdelivr.net/gh/nlohmann/json@develop/single_include/nlohmann/json.hpp
 ```
 
 ### 2.3 jwt-cpp — JWT 生成与验证
@@ -88,9 +88,8 @@ wget -O backend/third_party/json.hpp \
 | License | MIT |
 
 ```bash
-git clone --depth 1 https://github.com/Thalhammer/jwt-cpp.git /tmp/jwt-cpp
-cp /tmp/jwt-cpp/include/jwt-cpp/jwt.h backend/third_party/
-rm -rf /tmp/jwt-cpp
+wget -O backend/third_party/jwt.h \
+  https://cdn.jsdelivr.net/gh/Thalhammer/jwt-cpp@master/include/jwt-cpp/jwt.h
 ```
 
 ---
@@ -199,18 +198,17 @@ sudo apt install -y \
 echo "=== [2/5] Docker 权限 ==="
 sudo usermod -aG docker "$USER" 2>/dev/null || true
 
-echo "=== [3/5] header-only 库 ==="
+echo "=== [3/5] header-only 库 (通过 jsdelivr CDN) ==="
 mkdir -p backend/third_party
 
-wget -q -O backend/third_party/httplib.h \
-  https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h
+wget -O backend/third_party/httplib.h \
+  https://cdn.jsdelivr.net/gh/yhirose/cpp-httplib@master/httplib.h
 
-wget -q -O backend/third_party/json.hpp \
-  https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
+wget -O backend/third_party/json.hpp \
+  https://cdn.jsdelivr.net/gh/nlohmann/json@develop/single_include/nlohmann/json.hpp
 
-git clone --depth 1 https://github.com/Thalhammer/jwt-cpp.git /tmp/jwt-cpp
-cp /tmp/jwt-cpp/include/jwt-cpp/jwt.h backend/third_party/
-rm -rf /tmp/jwt-cpp
+wget -O backend/third_party/jwt.h \
+  https://cdn.jsdelivr.net/gh/Thalhammer/jwt-cpp@master/include/jwt-cpp/jwt.h
 
 echo "=== [4/5] Docker 基础镜像预热 ==="
 sudo docker pull ubuntu:22.04
@@ -240,7 +238,7 @@ echo "  docker build -t oj-judge:latest judge_image/   # 构建判题镜像"
 | 9 | mysql-client | apt | `sudo apt install` | 推荐 |
 | 10 | cpp-httplib | 头文件 | `wget` | 必须 |
 | 11 | nlohmann/json | 头文件 | `wget` 或 apt | 必须 |
-| 12 | jwt-cpp | 头文件 | `git clone` + `cp` | 必须 |
+| 12 | jwt-cpp | 头文件 | `wget` (jsdelivr) | 必须 |
 | 13 | ubuntu:22.04 | Docker 镜像 | `docker pull` | 必须 |
 | 14 | mysql:8.0 | Docker 镜像 | docker-compose 自动 | 必须 |
 | 15 | CodeMirror 6 | CDN | HTML `<script>` 引用 | 必须 |
