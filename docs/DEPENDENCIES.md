@@ -212,15 +212,15 @@ git clone --depth 1 https://github.com/Thalhammer/jwt-cpp.git /tmp/jwt-cpp
 cp /tmp/jwt-cpp/include/jwt-cpp/jwt.h backend/third_party/
 rm -rf /tmp/jwt-cpp
 
-echo "=== [4/5] 判题 Docker 镜像 ==="
-docker pull ubuntu:22.04
+echo "=== [4/5] Docker 基础镜像预热 ==="
+sudo docker pull ubuntu:22.04
 
 echo "=== [5/5] 完成 ==="
 echo ""
 echo "依赖安装完成。请重新登录以使 docker 权限生效。"
 echo "后续步骤:"
-echo "  docker compose up -d          # 启动 MySQL + 后端"
-echo "  bash install_all.sh    # 如需构建判题镜像"
+echo "  docker compose up -d                   # 启动 MySQL + 后端"
+echo "  docker build -t oj-judge:latest judge_image/   # 构建判题镜像"
 ```
 
 ---
