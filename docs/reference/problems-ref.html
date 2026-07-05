@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>题库 - Online OJ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f5f7fa;color:#1e293b;min-height:100vh;display:flex}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;flex-shrink:0;height:100vh;position:sticky;top:0}
+.sidebar .user-info{padding:20px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px}
+.sidebar .user-info .avatar{width:40px;height:40px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.sidebar .user-info .uname{font-size:14px;font-weight:600}
+.sidebar .user-info .urole{font-size:11px;color:#8c8c8c}
+.sidebar nav{padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.sidebar nav a{text-decoration:none;color:#555;font-size:14px;padding:8px 12px;border-radius:8px;transition:all .15s;display:flex;align-items:center;gap:8px}
+.sidebar nav a:hover{background:#f0f4ff}
+.sidebar nav a.active{background:#eff6ff;color:#3b82f6;font-weight:600}
+.sidebar .filters{padding:16px;border-top:1px solid #f0f0f0;flex:1}
+.sidebar .filters h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between}
+.sidebar .filters h3 span{background:#eff6ff;color:#3b82f6;padding:0 8px;border-radius:10px;font-size:11px}
+.filter-tags{display:flex;flex-direction:column;gap:4px}
+.filter-tags button{padding:7px 14px;border-radius:8px;font-size:13px;border:none;background:transparent;cursor:pointer;text-align:left;color:#555;transition:all .15s}
+.filter-tags button:hover{background:#f0f0f0}
+.filter-tags button.active{background:#3b82f6;color:#fff;font-weight:600}
+.sidebar .logout{padding:16px;border-top:1px solid #f0f0f0}
+.sidebar .logout a{color:#999;text-decoration:none;font-size:13px}
+.sidebar .logout a:hover{color:#ef4444}
+
+.main{flex:1;overflow-y:auto;padding:24px 28px}
+.main h2{font-size:20px;font-weight:700;margin-bottom:20px}
+.problem-grid{display:flex;flex-direction:column;gap:10px}
+.problem-card{display:flex;align-items:center;background:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:2px solid transparent;cursor:pointer;transition:all .2s}
+.problem-card:hover{background:#f8fafc;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.problem-card.active{border-color:#3b82f6;background:#f8faff}
+.problem-card .pnum{color:#94a3b8;font-size:13px;width:50px;flex-shrink:0}
+.problem-card .ptitle{flex:1;font-size:15px;font-weight:600}
+.problem-card .pmeta{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.difficulty{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.difficulty.easy{background:#dcfce7;color:#16a34a}
+.difficulty.medium{background:#fef3c7;color:#d97706}
+.difficulty.hard{background:#fee2e2;color:#dc2626}
+.ac-rate{font-size:12px;color:#94a3b8;width:50px;text-align:right}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="user-info">
+    <div class="avatar">A</div>
+    <div><div class="uname">admin</div><div class="urole">管理员</div></div>
+  </div>
+  <nav>
+    <a href="#"><i class="fa-solid fa-house"></i> 首页</a>
+    <a href="#" class="active"><i class="fa-solid fa-list"></i> 题库</a>
+    <a href="#"><i class="fa-solid fa-clock-rotate-left"></i> 提交记录</a>
+    <a href="#"><i class="fa-solid fa-gear"></i> 管理后台</a>
+  </nav>
+  <div class="filters">
+    <h3>题目列表 <span id="total">32</span></h3>
+    <div class="filter-tags" id="filter-tags">
+      <button class="active" data-filter="all">全部</button>
+      <button data-filter="easy">简单</button>
+      <button data-filter="medium">中等</button>
+      <button data-filter="hard">困难</button>
+    </div>
+  </div>
+  <div class="logout"><a href="#"><i class="fa-solid fa-right-from-bracket"></i> 退出</a></div>
+</aside>
+
+<main class="main">
+  <h2 id="section-title">全部题目</h2>
+  <div class="problem-grid" id="problem-grid"></div>
+</main>
+
+<script>
+const problems = [
+  {id:1,title:'两数之和',difficulty:'easy',acRate:75.5},
+  {id:2,title:'反转字符串',difficulty:'easy',acRate:62.1},
+  {id:3,title:'斐波那契数列',difficulty:'easy',acRate:88.3},
+  {id:4,title:'判断回文数',difficulty:'easy',acRate:54.0},
+  {id:5,title:'素数判断',difficulty:'easy',acRate:45.2},
+  {id:6,title:'最大子序和',difficulty:'medium',acRate:40.0},
+  {id:7,title:'冒泡排序',difficulty:'medium',acRate:33.7},
+  {id:8,title:'快速排序',difficulty:'medium',acRate:28.5},
+  {id:9,title:'二分查找',difficulty:'medium',acRate:51.2},
+  {id:10,title:'链表反转',difficulty:'medium',acRate:36.8},
+  {id:11,title:'最长公共子序列',difficulty:'hard',acRate:12.4},
+  {id:12,title:'编辑距离',difficulty:'hard',acRate:8.1},
+  {id:13,title:'N皇后问题',difficulty:'hard',acRate:6.5},
+  {id:14,title:'图的拓扑排序',difficulty:'hard',acRate:15.3},
+];
+
+let filter = 'all';
+
+function render() {
+  const filtered = filter === 'all' ? problems : problems.filter(p => p.difficulty === filter);
+  document.getElementById('total').textContent = filtered.length;
+  const labels = {all:'全部题目',easy:'简单题目',medium:'中等题目',hard:'困难题目'};
+  document.getElementById('section-title').textContent = labels[filter];
+
+  document.getElementById('problem-grid').innerHTML = filtered.map(p => `
+    <div class="problem-card" data-id="${p.id}" onclick="selectProblem(this, ${p.id}, '${p.title}')">
+      <span class="pnum">#${p.id}</span>
+      <span class="ptitle">${p.title}</span>
+      <span class="pmeta">
+        <span class="difficulty ${p.difficulty}">${p.difficulty==='easy'?'简单':p.difficulty==='medium'?'中等':'困难'}</span>
+        <span class="ac-rate">${p.acRate.toFixed(1)}%</span>
+      </span>
+    </div>
+  `).join('');
+}
+
+function selectProblem(el, id, title) {
+  document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  console.log('选中 [' + title + ']');
+}
+
+document.querySelectorAll('.filter-tags button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-tags button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    filter = this.dataset.filter;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

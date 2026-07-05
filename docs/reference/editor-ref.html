@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>做题 - Online OJ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.0/ace.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f1f5f9;color:#1e293b;height:100vh;display:flex;flex-direction:column}
+
+.topbar{height:56px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+.topbar .back{color:#2563eb;text-decoration:none;font-size:14px}
+.topbar .back:hover{text-decoration:underline}
+.topbar .logo{font-weight:800;font-size:18px;color:#2563eb}
+.topbar .user{display:flex;align-items:center;gap:8px;font-size:13px}
+.topbar .user .avatar{width:30px;height:30px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.topbar .user .logout{color:#999;cursor:pointer}
+.topbar .user .logout:hover{color:#ef4444}
+
+.content{display:flex;flex:1;overflow:hidden}
+
+.panel-left{width:45%;overflow-y:auto;padding:24px;border-right:1px solid #e5e7eb}
+.panel-left .phead{margin-bottom:16px}
+.panel-left .phead h1{font-size:22px;font-weight:700;margin-bottom:6px}
+.panel-left .phead .pid{color:#94a3b8;font-size:13px;margin-bottom:8px}
+.panel-left .phead .meta-row{display:flex;gap:10px;align-items:center;font-size:13px;color:#64748b;flex-wrap:wrap}
+.panel-left .phead .meta-row i{color:#94a3b8}
+.difficulty{padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.difficulty.easy{background:#dcfce7;color:#16a34a}
+.difficulty.medium{background:#fef3c7;color:#d97706}
+.difficulty.hard{background:#fee2e2;color:#dc2626}
+
+.panel-left .pdesc{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);line-height:1.8;font-size:14px;margin-bottom:16px}
+.panel-left .pdesc h3{font-size:15px;margin:12px 0 6px}
+.panel-left .pdesc p{margin-bottom:8px}
+.panel-left .sample{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px}
+.panel-left .sample h3{font-size:14px;margin-bottom:10px}
+.panel-left .sample pre{background:#f8fafc;padding:12px;border-radius:8px;font-size:13px;font-family:'SF Mono','Fira Code',monospace;border-left:3px solid #2563eb;margin-bottom:10px;white-space:pre-wrap}
+
+.panel-right{width:55%;display:flex;flex-direction:column;overflow:hidden}
+.editor-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:16px 16px 8px}
+.editor-toolbar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#2d2d2d;border-radius:12px 12px 0 0;font-size:13px;color:#ccc}
+.editor-toolbar select{padding:4px 10px;border:1px solid #555;border-radius:6px;font-size:12px;background:#3a3a3a;color:#ccc;outline:none}
+#editor{flex:1;border-radius:0 0 12px 12px}
+
+.tc-wrap{padding:0 16px 16px;overflow-y:auto;max-height:280px}
+.tc-wrap h3{font-size:14px;font-weight:700;margin-bottom:10px}
+.tc-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tc-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex:1;min-width:180px;font-size:13px}
+.tc-card .tc-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.tc-card .tc-lbl{font-weight:600;font-size:12px}
+.tc-card .tc-status{font-size:11px;padding:1px 8px;border-radius:10px}
+.tc-card .tc-status.pass{background:#dcfce7;color:#16a34a}
+.tc-card .tc-status.fail{background:#fee2e2;color:#dc2626}
+.tc-card .tc-status.wait{background:#f0f0f0;color:#94a3b8}
+.tc-card .tc-io{font-family:'SF Mono',monospace;font-size:12px;color:#555}
+.tc-card .tc-time{font-size:11px;color:#94a3b8;margin-top:4px}
+
+.actions{display:flex;align-items:center;gap:10px;padding:0 16px 16px}
+.actions .btn{padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .15s}
+.actions .btn:active{transform:scale(.97)}
+.actions .btn-run{background:#2563eb;color:#fff}
+.actions .btn-run:hover{background:#1d4ed8;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.actions .btn-run:disabled{opacity:.6;cursor:default}
+.actions .btn-clear{background:#fff;color:#555;border:1px solid #e5e5e5}
+.actions .btn-clear:hover{background:#f5f5f5}
+.summary{font-size:14px;font-weight:600;margin-left:16px}
+.summary.pass{color:#16a34a}
+.summary.fail{color:#dc2626}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="#" class="back" onclick="alert('返回题库列表')">&larr; 返回列表</a>
+  <span class="logo">OJ</span>
+  <div class="user">
+    <span>admin</span>
+    <div class="avatar">A</div>
+    <span class="logout" onclick="alert('退出登录')"><i class="fa-solid fa-right-from-bracket"></i></span>
+  </div>
+</header>
+
+<div class="content">
+  <div class="panel-left">
+    <div class="phead">
+      <h1>两数相加</h1>
+      <div class="pid">#563</div>
+      <div class="meta-row">
+        <span class="difficulty easy">简单</span>
+        <span>通过率 40.0%</span>
+        <span><i class="fa-regular fa-clock"></i> 1000ms</span>
+        <span><i class="fa-solid fa-microchip"></i> 256MB</span>
+      </div>
+    </div>
+    <div class="pdesc">
+      <h3>题目描述</h3>
+      <p>给定两个整数 a 和 b，计算它们的和。这是一个基础的编程入门题目，适合初学者练习输入输出操作。</p>
+      <h3>输入格式</h3>
+      <p>一行，包含两个整数 a 和 b，用空格分隔（-10⁹ ≤ a, b ≤ 10⁹）。</p>
+      <h3>输出格式</h3>
+      <p>一行，输出 a + b 的结果。</p>
+    </div>
+    <div class="sample">
+      <h3>示例 1</h3>
+      <pre>输入: 1 2\n输出: 3</pre>
+      <h3>示例 2</h3>
+      <pre>输入: 100 200\n输出: 300</pre>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="editor-wrap">
+      <div class="editor-toolbar">
+        <span><i class="fa-solid fa-code"></i> 代码编辑</span>
+        <select id="lang" onchange="switchLang()">
+          <option value="c_cpp">C++17</option>
+          <option value="java">Java</option>
+          <option value="python">Python</option>
+        </select>
+      </div>
+      <div id="editor"></div>
+    </div>
+
+    <div class="tc-wrap">
+      <h3>测试用例 <span style="color:#94a3b8;font-weight:400">2</span></h3>
+      <div class="tc-grid" id="tc-grid"></div>
+      <div class="summary" id="summary"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-run" id="btn-run" onclick="runCode()"><i class="fa-solid fa-play"></i> 运行代码</button>
+      <button class="btn btn-clear" onclick="clearCode()"><i class="fa-solid fa-eraser"></i> 清空</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const tcs = [
+  {id:1,input:'1 2',output:'3'},
+  {id:2,input:'100 200',output:'300'},
+];
+
+function renderTCs(results) {
+  document.getElementById('tc-grid').innerHTML = tcs.map((tc,i) => {
+    const r = results?.[i];
+    const statusCls = r ? (r.pass ? 'pass' : 'fail') : 'wait';
+    const statusTxt = r ? (r.pass ? '通过' : '失败') : '待评测';
+    return `<div class="tc-card">
+      <div class="tc-hdr">
+        <span class="tc-lbl">用例 ${i+1}</span>
+        <span class="tc-status ${statusCls}">${statusTxt}</span>
+      </div>
+      <div class="tc-io">输入: ${tc.input}</div>
+      <div class="tc-io">输出: ${tc.output}</div>
+      ${r ? `<div class="tc-time">${r.time}</div>` : '<div class="tc-time">-</div>'}
+    </div>`;
+  }).join('');
+}
+
+function simulateJudge() {
+  const pass = Math.random() > 0.3;
+  return tcs.map((tc,i) => ({pass: pass || i===0, time: Math.floor(Math.random()*10+1)+'ms'}));
+}
+
+let editor;
+function initEditor() {
+  editor = ace.edit('editor');
+  editor.setTheme('ace/theme/tomorrow_night_eighties');
+  editor.setFontSize(14);
+  editor.setOptions({showPrintMargin:false,tabSize:2,useSoftTabs:true});
+  editor.session.setMode('ace/mode/c_cpp');
+  editor.setValue('#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    return 0;\n}', -1);
+}
+function switchLang() {
+  const lang = document.getElementById('lang').value;
+  const codes = {
+    c_cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    return 0;\n}',
+    java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt(), b = sc.nextInt();\n        System.out.println(a + b);\n    }\n}',
+    python: 'a, b = map(int, input().split())\nprint(a + b)',
+  };
+  editor.session.setMode('ace/mode/'+lang);
+  editor.setValue(codes[lang], -1);
+}
+function runCode() {
+  const btn = document.getElementById('btn-run');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 判题中...';
+  btn.disabled = true;
+
+  renderTCs(null);
+  document.getElementById('summary').textContent = '';
+  document.getElementById('summary').className = 'summary';
+
+  setTimeout(() => {
+    const results = simulateJudge();
+    renderTCs(results);
+    const allPass = results.every(r => r.pass);
+    const summary = document.getElementById('summary');
+    summary.textContent = results.filter(r=>r.pass).length + '/' + results.length + ' 通过 ' + (allPass ? 'All test cases passed' : '');
+    summary.className = 'summary ' + (allPass ? 'pass' : 'fail');
+    btn.innerHTML = '<i class="fa-solid fa-play"></i> 运行代码';
+    btn.disabled = false;
+  }, 2000);
+}
+function clearCode() { editor.setValue('', -1); }
+
+initEditor();
+renderTCs(null);
+</script>
+</body>
+</html>
