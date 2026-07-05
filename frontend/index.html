@@ -3,34 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online OJ</title>
-<link rel="stylesheet" href="css/style.css">
+<title>Online OJ - 在线判题系统</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.0/ace.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#1a1a2e;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+.topbar{height:52px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:0 20px;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-shrink:0}
+.topbar .logo{font-size:20px;font-weight:800;color:#3b82f6;letter-spacing:-1px;margin-right:32px;display:flex;align-items:center;gap:6px}
+.topbar .logo i{font-size:22px}
+.topbar nav{display:flex;gap:4px;flex:1}
+.topbar nav a{text-decoration:none;color:#6b7280;font-size:14px;padding:6px 16px;border-radius:6px;transition:all .2s;font-weight:500}
+.topbar nav a:hover{color:#1a1a2e;background:#f3f4f6}
+.topbar nav a.active{color:#3b82f6;background:#eff6ff;font-weight:600}
+.topbar .topbar-right{display:flex;align-items:center;gap:14px}
+.topbar .topbar-right .icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:14px}
+.topbar .topbar-right .icon-btn:hover{background:#f3f4f6;color:#3b82f6;border-color:#3b82f6}
+.topbar .topbar-right .avatar{width:34px;height:34px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer}
+.topbar .topbar-right .logout{text-decoration:none;color:#9ca3af;font-size:13px;cursor:pointer;transition:color .2s}
+.topbar .topbar-right .logout:hover{color:#ef4444}
+
+.main-layout{display:flex;flex:1;overflow:hidden}
+
+.sidebar{width:280px;background:#fff;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.sidebar-header h3{font-size:15px;font-weight:700}
+.sidebar-header .count{background:#eff6ff;color:#3b82f6;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700}
+.sidebar-list{flex:1;overflow-y:auto;padding:8px}
+.sidebar-list .problem-item{padding:12px 14px;border-radius:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.sidebar-list .problem-item:hover{background:#f8fafc}
+.sidebar-list .problem-item.active{background:#eff6ff;border:1px solid #bfdbfe}
+.sidebar-list .problem-item .status-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sidebar-list .problem-item .status-icon.solved{color:#22c55e}
+.sidebar-list .problem-item .status-icon.unsolved{color:#d1d5db}
+.sidebar-list .problem-item .info{flex:1;min-width:0}
+.sidebar-list .problem-item .info .title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-list .problem-item .info .meta{font-size:12px;color:#9ca3af;margin-top:2px}
+.difficulty{font-size:11px;padding:1px 8px;border-radius:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.difficulty.easy{background:#dcfce7;color:#16a34a}
+.difficulty.medium{background:#fef3c7;color:#d97706}
+.difficulty.hard{background:#fee2e2;color:#dc2626}
+
+.content-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.content-scroll{flex:1;overflow-y:auto;padding:20px 24px}
+
+.problem-header{margin-bottom:20px}
+.problem-header h1{font-size:22px;font-weight:800;margin-bottom:10px}
+.problem-header .meta-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;color:#6b7280}
+.problem-header .meta-row .tag{background:#f3f4f6;padding:2px 10px;border-radius:6px;font-size:12px}
+.problem-header .meta-row .limit{display:flex;align-items:center;gap:4px}
+
+.problem-desc{background:#fff;border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);line-height:1.8;font-size:14px}
+.problem-desc h3{font-size:15px;margin-bottom:8px;color:#374151}
+.problem-desc p{margin-bottom:8px}
+.problem-desc .io-example{background:#f9fafb;border-left:3px solid #3b82f6;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;font-family:monospace;font-size:13px;white-space:pre-wrap}
+
+.editor-section{background:#fff;border-radius:10px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+.editor-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #f0f0f0;background:#fafbfc}
+.editor-header span{font-size:13px;font-weight:700;color:#374151}
+.editor-header select{padding:4px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;color:#374151;cursor:pointer;outline:none}
+.editor-header select:focus{border-color:#3b82f6}
+#editor{height:360px;min-height:200px;font-size:14px}
+
+.testcase-section{background:#fff;border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.testcase-section .tc-title{font-size:13px;font-weight:700;margin-bottom:12px;color:#374151}
+.testcase-section .tc-title span{color:#9ca3af;font-weight:400}
+.testcase-inputs{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.testcase-inputs input{flex:1;min-width:180px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:monospace;outline:none;transition:border .2s}
+.testcase-inputs input:focus{border-color:#3b82f6}
+.testcase-inputs .btn-add{padding:8px 16px;background:#fff;border:1px dashed #d1d5db;border-radius:6px;color:#6b7280;cursor:pointer;font-size:13px;transition:all .2s;white-space:nowrap}
+.testcase-inputs .btn-add:hover{border-color:#3b82f6;color:#3b82f6;background:#f8faff}
+
+.action-buttons{display:flex;gap:10px}
+.btn{padding:9px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none;outline:none}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb;box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.btn-secondary{background:#f3f4f6;color:#374151}
+.btn-secondary:hover{background:#e5e7eb}
+.btn-outline{background:#fff;color:#3b82f6;border:1.5px solid #3b82f6}
+.btn-outline:hover{background:#eff6ff}
+
+.footer{text-align:center;padding:12px;font-size:12px;color:#9ca3af;border-top:1px solid #f0f0f0;background:#fff;flex-shrink:0}
+.footer i{margin:0 4px}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 28px;border-radius:10px;font-size:14px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast.show{opacity:1}
+.toast.success{background:#16a34a}
+.toast.error{background:#dc2626}
+</style>
 </head>
 <body>
-<div id="app">
-  <nav id="navbar">
-    <a href="#" class="logo">Online OJ</a>
-    <div class="nav-links">
-      <a href="#/problems">题目</a>
-      <a href="#/history">记录</a>
-      <a href="#/profile">个人</a>
-      <a href="#/admin" id="nav-admin" style="display:none">管理</a>
-      <a href="#/login" id="nav-login">登录</a>
-      <a href="#" id="nav-logout" style="display:none" onclick="Auth.logout()">退出</a>
-    </div>
+
+<header class="topbar">
+  <div class="logo"><i class="fa-solid fa-code"></i> OJ</div>
+  <nav>
+    <a href="#" class="active" data-nav="problems"><i class="fa-solid fa-list" style="margin-right:6px"></i>题目</a>
+    <a href="#" data-nav="submissions"><i class="fa-solid fa-clock-rotate-left" style="margin-right:6px"></i>提交记录</a>
+    <a href="#" data-nav="leaderboard"><i class="fa-solid fa-trophy" style="margin-right:6px"></i>排行榜</a>
   </nav>
-  <main id="main-content"></main>
+  <div class="topbar-right">
+    <button class="icon-btn" title="管理后台"><i class="fa-solid fa-gear"></i></button>
+    <div class="avatar" title="用户">A</div>
+    <span class="logout"><i class="fa-solid fa-right-from-bracket"></i> 退出</span>
+  </div>
+</header>
+
+<div class="main-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3>题目列表</h3>
+      <span class="count">4</span>
+    </div>
+    <div class="sidebar-list" id="problem-list"></div>
+  </aside>
+
+  <section class="content-area">
+    <div class="content-scroll">
+      <div class="problem-header">
+        <h1 id="problem-title">1. 简单相加</h1>
+        <div class="meta-row">
+          <span class="limit"><i class="fa-regular fa-clock"></i> 时间限制: 1000ms</span>
+          <span class="limit"><i class="fa-solid fa-microchip"></i> 内存限制: 256MB</span>
+          <span class="tag">入门</span>
+          <span class="difficulty easy" id="problem-difficulty">简单</span>
+        </div>
+      </div>
+
+      <div class="problem-desc" id="problem-desc"></div>
+
+      <div class="editor-section">
+        <div class="editor-header">
+          <span><i class="fa-solid fa-code"></i> 代码编辑区</span>
+          <select id="lang-select" onchange="switchLanguage()">
+            <option value="c_cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="python">Python</option>
+          </select>
+        </div>
+        <div id="editor"></div>
+      </div>
+
+      <div class="testcase-section">
+        <div class="tc-title">测试用例区 <span>（可选，用于自定义验证）</span></div>
+        <div class="testcase-inputs">
+          <input type="text" id="tc-input1" placeholder="输入1，如: 2 3">
+          <input type="text" id="tc-input2" placeholder="输入2，如: 5 7">
+          <button class="btn-add" onclick="addTestCase()"><i class="fa-solid fa-plus"></i> 添加</button>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="submitCode()"><i class="fa-solid fa-paper-plane"></i> 提交</button>
+          <button class="btn btn-secondary" onclick="clearEditor()"><i class="fa-solid fa-eraser"></i> 清空</button>
+          <button class="btn btn-outline" onclick="runSample()"><i class="fa-solid fa-play"></i> 运行样例</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <i class="fa-solid fa-shield-halved"></i> 你的代码将在安全沙箱中运行 <i class="fa-solid fa-shield-halved"></i> &nbsp;|&nbsp; Online OJ &copy; 2026
+    </div>
+  </section>
+
 </div>
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/router.js"></script>
-<script src="js/pages/login.js"></script>
-<script src="js/pages/problemList.js"></script>
-<script src="js/pages/problemDetail.js"></script>
-<script src="js/pages/submissionResult.js"></script>
-<script src="js/pages/history.js"></script>
-<script src="js/pages/profile.js"></script>
-<script src="js/pages/admin.js"></script>
-<script src="js/app.js"></script>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const problems = [
+  {
+    id: 1, title: '简单相加', difficulty: 'easy', difficultyLabel: '简单',
+    timeLimit: '1000ms', memoryLimit: '256MB',
+    desc: `<h3>题目描述</h3><p>给定两个整数 a 和 b，计算它们的和。</p><h3>输入格式</h3><p>一行两个整数 a 和 b，空格分隔。</p><h3>输出格式</h3><p>一个整数，表示 a + b 的结果。</p><div class="io-example"><strong>样例输入</strong>\n2 3\n\n<strong>样例输出</strong>\n5</div>`,
+    code_cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    return 0;\n}',
+    code_java: 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(a + b);\n    }\n}',
+    code_python: 'a, b = map(int, input().split())\nprint(a + b)',
+    solved: true
+  },
+  {
+    id: 2, title: '判断奇偶', difficulty: 'easy', difficultyLabel: '简单',
+    timeLimit: '1000ms', memoryLimit: '256MB',
+    desc: `<h3>题目描述</h3><p>给定一个整数 n，判断它是奇数还是偶数。</p><h3>输入格式</h3><p>一行一个整数 n。</p><h3>输出格式</h3><p>如果 n 是偶数，输出 "EVEN"；否则输出 "ODD"。</p><div class="io-example"><strong>样例输入</strong>\n4\n\n<strong>样例输出</strong>\nEVEN</div>`,
+    code_cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << (n % 2 == 0 ? "EVEN" : "ODD") << endl;\n    return 0;\n}',
+    code_java: 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(n % 2 == 0 ? "EVEN" : "ODD");\n    }\n}',
+    code_python: 'n = int(input())\nprint("EVEN" if n % 2 == 0 else "ODD")',
+    solved: false
+  },
+  {
+    id: 3, title: '判断质数', difficulty: 'medium', difficultyLabel: '中等',
+    timeLimit: '2000ms', memoryLimit: '512MB',
+    desc: `<h3>题目描述</h3><p>给定一个正整数 n，判断它是否为质数。质数是指大于 1 且只能被 1 和自身整除的自然数。</p><h3>输入格式</h3><p>一行一个整数 n (1 ≤ n ≤ 10⁶)。</p><h3>输出格式</h3><p>如果是质数输出 "YES"，否则输出 "NO"。</p><div class="io-example"><strong>样例输入</strong>\n7\n\n<strong>样例输出</strong>\nYES</div>`,
+    code_cpp: '#include <iostream>\n#include <cmath>\nusing namespace std;\n\nbool isPrime(int n) {\n    if (n < 2) return false;\n    for (int i = 2; i <= sqrt(n); i++)\n        if (n % i == 0) return false;\n    return true;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << (isPrime(n) ? "YES" : "NO") << endl;\n    return 0;\n}',
+    code_java: 'import java.util.Scanner;\n\npublic class Main {\n    static boolean isPrime(int n) {\n        if (n < 2) return false;\n        for (int i = 2; i * i <= n; i++)\n            if (n % i == 0) return false;\n        return true;\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(isPrime(n) ? "YES" : "NO");\n    }\n}',
+    code_python: 'def is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nn = int(input())\nprint("YES" if is_prime(n) else "NO")',
+    solved: true
+  },
+  {
+    id: 4, title: '计算最大公约数', difficulty: 'medium', difficultyLabel: '中等',
+    timeLimit: '1000ms', memoryLimit: '256MB',
+    desc: `<h3>题目描述</h3><p>给定两个正整数 a 和 b，计算它们的最大公约数 (GCD)。</p><h3>输入格式</h3><p>一行两个正整数 a 和 b (1 ≤ a, b ≤ 10⁹)，空格分隔。</p><h3>输出格式</h3><p>一个整数，表示 a 和 b 的最大公约数。</p><div class="io-example"><strong>样例输入</strong>\n12 18\n\n<strong>样例输出</strong>\n6</div>`,
+    code_cpp: '#include <iostream>\nusing namespace std;\n\nint gcd(int a, int b) {\n    while (b) { int t = b; b = a % b; a = t; }\n    return a;\n}\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << gcd(a, b) << endl;\n    return 0;\n}',
+    code_java: 'import java.util.Scanner;\n\npublic class Main {\n    static int gcd(int a, int b) {\n        while (b != 0) { int t = b; b = a % b; a = t; }\n        return a;\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt(), b = sc.nextInt();\n        System.out.println(gcd(a, b));\n    }\n}',
+    code_python: 'import math\na, b = map(int, input().split())\nprint(math.gcd(a, b))',
+    solved: false
+  }
+];
+
+let currentProblem = 0;
+let editor;
+
+function initEditor() {
+  editor = ace.edit('editor');
+  editor.setTheme('ace/theme/tomorrow');
+  editor.setFontSize(14);
+  editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, showPrintMargin: false, tabSize: 2, useSoftTabs: true });
+  editor.session.setMode('ace/mode/c_cpp');
+  loadProblem(0);
+}
+
+function loadProblem(idx) {
+  currentProblem = idx;
+  const p = problems[idx];
+  document.getElementById('problem-title').textContent = (idx + 1) + '. ' + p.title;
+  document.getElementById('problem-desc').innerHTML = p.desc;
+  document.getElementById('problem-difficulty').textContent = p.difficultyLabel;
+  document.getElementById('problem-difficulty').className = 'difficulty ' + p.difficulty;
+
+  const lang = document.getElementById('lang-select').value;
+  editor.session.setValue(p['code_' + ({c_cpp:'cpp',java:'java',python:'python'}[lang] || 'cpp')], -1);
+  editor.session.setMode('ace/mode/' + lang);
+
+  document.querySelectorAll('.problem-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+}
+
+function renderSidebar() {
+  const list = document.getElementById('problem-list');
+  list.innerHTML = problems.map((p, i) => `
+    <div class="problem-item ${i === 0 ? 'active' : ''}" onclick="loadProblem(${i})">
+      <span class="status-icon ${p.solved ? 'solved' : 'unsolved'}">
+        <i class="fa-solid ${p.solved ? 'fa-circle-check' : 'fa-circle'}"></i>
+      </span>
+      <div class="info">
+        <div class="title">${i + 1}. ${p.title}</div>
+        <div class="meta">${p.timeLimit} · ${p.memoryLimit}</div>
+      </div>
+      <span class="difficulty ${p.difficulty}">${p.difficultyLabel}</span>
+    </div>
+  `).join('');
+}
+
+function switchLanguage() {
+  const lang = document.getElementById('lang-select').value;
+  const modeMap = { c_cpp: 'c_cpp', java: 'java', python: 'python' };
+  const codeMap = { c_cpp: 'cpp', java: 'java', python: 'python' };
+  editor.session.setMode('ace/mode/' + modeMap[lang]);
+  editor.session.setValue(problems[currentProblem]['code_' + codeMap[lang]], -1);
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function submitCode() { showToast('代码已提交，正在判题...', 'success'); }
+function clearEditor() { editor.session.setValue('', -1); showToast('编辑器已清空'); }
+function runSample() { showToast('运行样例（模拟）', ''); }
+function addTestCase() {
+  const i1 = document.getElementById('tc-input1').value;
+  const i2 = document.getElementById('tc-input2').value;
+  if (i1 || i2) showToast('测试用例已添加: ' + (i1 || '') + ' | ' + (i2 || ''));
+  else showToast('请输入测试用例', 'error');
+}
+
+document.querySelectorAll('.topbar nav a').forEach(a => {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.topbar nav a').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+renderSidebar();
+initEditor();
+</script>
+
 </body>
 </html>
