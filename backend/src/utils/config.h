@@ -2,40 +2,26 @@
 #define CONFIG_H
 
 #include <string>
+#include <unordered_map>
 
-namespace config {
+class ConfigManager {
+public:
+    static ConfigManager& getInstance();
 
-struct DatabaseConfig {
-    std::string host;
-    int port;
-    std::string user;
-    std::string password;
-    std::string database;
+    void loadFromYAML(const std::string& filepath);
+
+    std::string getString(const std::string& key, const std::string& def = "") const;
+    int         getInt(const std::string& key, int def = 0) const;
+
+private:
+    ConfigManager() = default;
+    ConfigManager(const ConfigManager&) = delete;
+    ConfigManager& operator=(const ConfigManager&) = delete;
+
+    void parseLine(const std::string& line, std::string& prefix, int& indent);
+    std::string trim(const std::string& s) const;
+
+    std::unordered_map<std::string, std::string> data_;
 };
-
-struct ServerConfig {
-    int port;
-    std::string static_dir;
-};
-
-struct JudgeConfig {
-    std::string docker_image;
-    std::string code_storage_path;
-    int max_code_size;
-};
-
-struct AuthConfig {
-    std::string jwt_secret;
-    int jwt_expire_seconds;
-};
-
-void load(const std::string& config_file = "");
-
-const DatabaseConfig& database();
-const ServerConfig& server();
-const JudgeConfig& judge();
-const AuthConfig& auth();
-
-} // namespace config
 
 #endif // CONFIG_H

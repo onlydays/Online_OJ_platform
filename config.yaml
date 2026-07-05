@@ -1,0 +1,21 @@
+# Online OJ Platform 配置文件
+
+database:
+  host: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "2791830200Zby.."
+  database: "oj_platform"
+
+server:
+  port: 8080
+  static_dir: "../frontend"
+
+judge:
+  docker_image: "oj-judge:latest"
+  code_storage_path: "./data/submissions"
+  max_code_size: 65536
+
+auth:
+  jwt_secret: "oj-platform-jwt-secret-key-2026"
+  jwt_expire_seconds: 86400
