@@ -9,7 +9,9 @@ include_directories(${CMAKE_SOURCE_DIR}/backend/third_party)
 
 set(UNIT_TEST_SOURCES
     unit/test_config.cc
+    unit/test_logger.cc
     ${CMAKE_SOURCE_DIR}/backend/src/utils/config.cc
+    ${CMAKE_SOURCE_DIR}/backend/src/utils/logger.cc
 )
 
 add_executable(unit_tests ${UNIT_TEST_SOURCES})
