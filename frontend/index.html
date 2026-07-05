@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online OJ</title>
+<title>Online OJ - 在线判题</title>
 <link rel="stylesheet" href="css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.0/ace.min.js"></script>
 </head>
 <body>
 <div id="app">
   <nav id="navbar">
-    <a href="#/problems" class="logo">Online OJ</a>
-    <div class="nav-links">
+    <a href="#/" class="logo">Online OJ</a>
+    <div class="nav-links" id="nav-links">
+      <a href="#/" class="active">首页</a>
       <a href="#/problems">题库</a>
       <a href="#/history">提交</a>
     </div>
@@ -30,6 +32,7 @@
 <script src="js/auth.js"></script>
 <script src="js/router.js"></script>
 <script src="js/pages/login.js"></script>
+<script src="js/pages/home.js"></script>
 <script src="js/pages/problemList.js"></script>
 <script src="js/pages/problemDetail.js"></script>
 <script src="js/pages/submissionResult.js"></script>

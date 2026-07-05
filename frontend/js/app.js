@@ -1,6 +1,8 @@
 const App = {
   init() {
+    Router.register('#/', (ctx) => HomePage.render());
     Router.register('#/login', (ctx) => LoginPage.render(ctx));
+
     Router.register('#/problems', (ctx) => {
       if (!Auth.requireAuth()) return;
       ProblemListPage.render(ctx);
@@ -26,8 +28,18 @@ const App = {
       AdminPage.render(ctx);
     });
 
+    window.addEventListener('hashchange', () => this.highlightNav());
     Auth.updateNav();
     Router.start();
+  },
+
+  highlightNav() {
+    const hash = window.location.hash || '#/';
+    const links = document.querySelectorAll('#nav-links a');
+    links.forEach(a => {
+      const href = a.getAttribute('href');
+      a.classList.toggle('active', hash === href || (hash.startsWith(href) && href !== '#/'));
+    });
   },
 };
 
