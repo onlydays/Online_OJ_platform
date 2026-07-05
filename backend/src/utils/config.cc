@@ -85,7 +85,10 @@ int ConfigManager::getInt(const std::string& key, int def) const {
     auto it = data_.find(key);
     if (it == data_.end()) return def;
     try {
-        return std::stoi(it->second);
+        size_t pos = 0;
+        int val = std::stoi(it->second, &pos);
+        if (pos != it->second.size()) return def;
+        return val;
     } catch (...) {
         return def;
     }

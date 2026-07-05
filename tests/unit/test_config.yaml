@@ -1,0 +1,14 @@
+# Online OJ Platform 单元测试配置文件
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+database:
+  host: "localhost"
+  port: 3306
+  username: "testuser"
+  password: "testpass"
+  database: "testdb"
+
+empty_value_key:
