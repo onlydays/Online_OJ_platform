@@ -18,8 +18,8 @@ private:
     ConfigManager(const ConfigManager&) = delete;
     ConfigManager& operator=(const ConfigManager&) = delete;
 
-    void parseLine(const std::string& line, std::string& prefix, int& indent);
     std::string trim(const std::string& s) const;
+    int countIndent(const std::string& line) const;
 
     std::unordered_map<std::string, std::string> data_;
 };

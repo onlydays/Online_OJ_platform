@@ -1,15 +1,17 @@
 # Online OJ Platform 配置文件
 
+server:
+  host: "0.0.0.0"
+  port: 8080
+  thread_pool_size: 4
+
 database:
   host: "127.0.0.1"
   port: 3306
-  user: "root"
+  username: "root"
   password: "2791830200Zby.."
   database: "oj_platform"
-
-server:
-  port: 8080
-  static_dir: "../frontend"
+  max_connections: 10
 
 judge:
   docker_image: "oj-judge:latest"

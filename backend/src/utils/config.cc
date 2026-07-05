@@ -1,6 +1,5 @@
 #include "config.h"
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -17,57 +16,63 @@ std::string ConfigManager::trim(const std::string& s) const {
     return s.substr(start, end - start);
 }
 
-void ConfigManager::parseLine(const std::string& line, std::string& prefix, int& indent) {
-    std::string trimmed = trim(line);
-    if (trimmed.empty() || trimmed[0] == '#') return;
-
-    int currentIndent = 0;
+int ConfigManager::countIndent(const std::string& line) const {
+    int n = 0;
     for (char c : line) {
-        if (c == ' ') ++currentIndent;
+        if (c == ' ') ++n;
         else break;
     }
-
-    while (!prefix.empty() && currentIndent <= indent) {
-        auto pos = prefix.rfind('.');
-        if (pos == std::string::npos) {
-            prefix.clear();
-            break;
-        }
-        indent -= 2;
-        prefix = prefix.substr(0, pos);
-    }
-
-    auto colon = trimmed.find(':');
-    if (colon == std::string::npos) return;
-
-    std::string key = trim(trimmed.substr(0, colon));
-    std::string value = trim(trimmed.substr(colon + 1));
-
-    if (value.empty()) {
-        prefix = prefix.empty() ? key : prefix + "." + key;
-        indent = currentIndent;
-        return;
-    }
-
-    if (value.front() == '"' && value.back() == '"')
-        value = value.substr(1, value.size() - 2);
-
-    std::string fullKey = prefix.empty() ? key : prefix + "." + key;
-    data_[fullKey] = value;
+    return n;
 }
 
 void ConfigManager::loadFromYAML(const std::string& filepath) {
     data_.clear();
+
     std::ifstream file(filepath);
     if (!file.is_open())
         throw std::runtime_error("Cannot open config file: " + filepath);
 
+    std::vector<std::string> lines;
     std::string line;
-    std::string prefix;
-    int indent = -1;
-
     while (std::getline(file, line)) {
-        parseLine(line, prefix, indent);
+        lines.push_back(line);
+    }
+
+    std::vector<std::string> prefixStack;
+    std::vector<int> indentStack;
+
+    for (size_t i = 0; i < lines.size(); ++i) {
+        std::string trimmed = trim(lines[i]);
+        if (trimmed.empty() || trimmed[0] == '#') continue;
+
+        int curIndent = countIndent(lines[i]);
+
+        while (!indentStack.empty() && curIndent <= indentStack.back()) {
+            prefixStack.pop_back();
+            indentStack.pop_back();
+        }
+
+        auto colon = trimmed.find(':');
+        if (colon == std::string::npos) continue;
+
+        std::string key = trim(trimmed.substr(0, colon));
+        std::string value = trim(trimmed.substr(colon + 1));
+
+        if (!value.empty() && value.front() == '"' && value.back() == '"')
+            value = value.substr(1, value.size() - 2);
+
+        std::string fullKey;
+        for (const auto& p : prefixStack) {
+            fullKey += p + ".";
+        }
+        fullKey += key;
+
+        if (value.empty() && i + 1 < lines.size() && countIndent(lines[i + 1]) > curIndent) {
+            prefixStack.push_back(key);
+            indentStack.push_back(curIndent);
+        } else {
+            data_[fullKey] = value;
+        }
     }
 }
 
